@@ -1,0 +1,40 @@
+<html lang="en">
+  <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta http-equiv="X-UA-Compatible" content="ie=edge">
+      <title>M1 Widget Demo</title>
+      <script src="https://api-stg.measureone.com/v3/js/m1-link-2021042000.js"></script> 
+  </head>
+  <body>
+    <h1>M1 Widget Demo</h1>
+    <div>
+      <m1-link></m1-link>
+    </div>
+    
+    <script>
+      // Configuration will be injected by Android app
+      var config = null;
+      
+      // Take reference to widget
+      const m1_widget = document.querySelector("m1-link");
+      
+      // Add event listeners
+      m1_widget.addEventListener('datasourceConnected', function(event) {
+          console.log('Datasource connected event:', event);
+          // Communicate with Android app
+          if (typeof Android !== 'undefined') {
+              Android.onDatasourceConnected(JSON.stringify(event));
+          }
+      });
+
+      // Listen for configuration injection
+      document.addEventListener('DOMContentLoaded', function() {
+          console.log('M1 Widget HTML loaded, waiting for configuration...');
+          if (typeof Android !== 'undefined') {
+              Android.onMessageReceived('M1 Widget HTML loaded successfully');
+          }
+      });
+    </script>
+  </body>
+</html>

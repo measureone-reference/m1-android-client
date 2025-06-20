@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebView Demo</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        .button {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            margin: 10px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+        .button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        }
+        .button:active {
+            transform: translateY(0);
+        }
+        .input-field {
+            width: 100%;
+            padding: 15px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            background: rgba(255, 255, 255, 0.9);
+            color: #333;
+        }
+        .event-log {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .event-item {
+            margin: 5px 0;
+            padding: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+            font-family: monospace;
+        }
+        .section {
+            margin: 20px 0;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+        }
+        .status {
+            text-align: center;
+            font-weight: bold;
+            margin: 10px 0;
+            padding: 10px;
+            background: rgba(76, 175, 80, 0.3);
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌐 WebView Demo</h1>
+        
+        <div class="status" id="status">
+            JavaScript is running! 🚀
+        </div>
+
+        <div class="section">
+            <h2>📱 Android Communication</h2>
+            <input type="text" id="messageInput" class="input-field" placeholder="Enter a message to send to Android...">
+            <button class="button" onclick="sendMessageToAndroid()">Send to Android</button>
+            <button class="button" onclick="showAndroidToast()">Show Android Toast</button>
+        </div>
+
+        <div class="section">
+            <h2>🎯 Event Testing</h2>
+            <button class="button" onclick="testClick()">Test Click Event</button>
+            <button class="button" onclick="testCustomEvent()">Test Custom Event</button>
+            <button class="button" onclick="simulateScroll()">Simulate Scroll</button>
+        </div>
+
+        <div class="section">
+            <h2>📊 Event Log</h2>
+            <div class="event-log" id="eventLog">
+                <div class="event-item">Event log initialized...</div>
+            </div>
+            <button class="button" onclick="clearLog()">Clear Log</button>
+        </div>
+
+        <div class="section">
+            <h2>🔧 JavaScript Functions</h2>
+            <button class="button" onclick="getDeviceInfo()">Get Device Info</button>
+            <button class="button" onclick="testLocalStorage()">Test Local Storage</button>
+            <button class="button" onclick="loadExternalContent()">Load External Content</button>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let eventCounter = 0;
+        const eventLog = document.getElementById('eventLog');
+        const status = document.getElementById('status');
+
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', function() {
+            logEvent('Page loaded successfully');
+            updateStatus('Ready to communicate with Android');
+            
+            // Test if Android interface is available
+            if (typeof Android !== 'undefined') {
+                logEvent('Android interface detected');
+                updateStatus('Android bridge connected');
+            } else {
+                logEvent('Android interface not available');
+                updateStatus('Running in browser mode');
+            }
+        });
+
+        // Utility functions
+        function logEvent(message) {
+            eventCounter++;
+            const timestamp = new Date().toLocaleTimeString();
+            const eventItem = document.createElement('div');
+            eventItem.className = 'event-item';
+            eventItem.innerHTML = `[${timestamp}] #${eventCounter}: ${message}`;
+            eventLog.appendChild(eventItem);
+            eventLog.scrollTop = eventLog.scrollHeight;
+            
+            // Also log to console
+            console.log(`Event #${eventCounter}: ${message}`);
+        }
+
+        function updateStatus(message) {
+            status.textContent = message;
+            logEvent(`Status: ${message}`);
+        }
+
+        function clearLog() {
+            eventLog.innerHTML = '<div class="event-item">Event log cleared...</div>';
+            eventCounter = 0;
+        }
+
+        // Android communication functions
+        function sendMessageToAndroid() {
+            const message = document.getElementById('messageInput').value;
+            if (message.trim()) {
+                if (typeof Android !== 'undefined') {
+                    Android.onMessageReceived(message);
+                    logEvent(`Sent to Android: "${message}"`);
+                    document.getElementById('messageInput').value = '';
+                } else {
+                    logEvent('Android interface not available');
+                }
+            } else {
+                logEvent('No message to send');
+            }
+        }
+
+        function showAndroidToast() {
+            if (typeof Android !== 'undefined') {
+                Android.showToast('Hello from WebView! 🎉');
+                logEvent('Android toast requested');
+            } else {
+                logEvent('Android interface not available');
+            }
+        }
+
+        // Event testing functions
+        function testClick() {
+            logEvent('Manual click test triggered');
+            if (typeof Android !== 'undefined') {
+                Android.onClick('BUTTON: Test Click Event');
+            }
+        }
+
+        function testCustomEvent() {
+            const customEvent = new CustomEvent('webviewEvent', {
+                detail: {
+                    type: 'custom',
+                    message: 'This is a custom event',
+                    timestamp: Date.now()
+                }
+            });
+            window.dispatchEvent(customEvent);
+            logEvent('Custom event dispatched');
+        }
+
+        function simulateScroll() {
+            window.scrollTo(0, 100);
+            setTimeout(() => window.scrollTo(0, 0), 500);
+            logEvent('Scroll simulation triggered');
+        }
+
+        // JavaScript functionality tests
+        function getDeviceInfo() {
+            const info = {
+                userAgent: navigator.userAgent,
+                platform: navigator.platform,
+                language: navigator.language,
+                cookieEnabled: navigator.cookieEnabled,
+                onLine: navigator.onLine,
+                screenWidth: screen.width,
+                screenHeight: screen.height,
+                windowWidth: window.innerWidth,
+                windowHeight: window.innerHeight
+            };
+            
+            logEvent(`Device Info: ${JSON.stringify(info, null, 2)}`);
+            console.log('Device Info:', info);
+        }
+
+        function testLocalStorage() {
+            try {
+                localStorage.setItem('webview_test', 'Hello from WebView!');
+                const value = localStorage.getItem('webview_test');
+                logEvent(`Local Storage Test: ${value}`);
+            } catch (error) {
+                logEvent(`Local Storage Error: ${error.message}`);
+            }
+        }
+
+        function loadExternalContent() {
+            // This would typically load external content
+            // For demo purposes, we'll just log the attempt
+            logEvent('External content load requested');
+            updateStatus('External content loading...');
+            
+            setTimeout(() => {
+                updateStatus('External content loaded successfully');
+                logEvent('External content loaded');
+            }, 2000);
+        }
+
+        // Event listeners for various events
+        window.addEventListener('message', function(event) {
+            logEvent(`Message event received: ${JSON.stringify(event.data)}`);
+        });
+
+        window.addEventListener('scroll', function() {
+            logEvent(`Scroll event: Y=${window.scrollY}`);
+        });
+
+        window.addEventListener('resize', function() {
+            logEvent(`Resize event: ${window.innerWidth}x${window.innerHeight}`);
+        });
+
+        window.addEventListener('webviewEvent', function(event) {
+            logEvent(`Custom event received: ${JSON.stringify(event.detail)}`);
+        });
+
+        // Keyboard events
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Enter' && event.target.id === 'messageInput') {
+                sendMessageToAndroid();
+            }
+        });
+
+        // Touch events (for mobile)
+        document.addEventListener('touchstart', function(event) {
+            logEvent(`Touch start: ${event.touches.length} fingers`);
+        });
+
+        // Periodic status update
+        setInterval(() => {
+            const memory = performance.memory ? 
+                `Memory: ${Math.round(performance.memory.usedJSHeapSize / 1024 / 1024)}MB` : 
+                'Memory info not available';
+            logEvent(memory);
+        }, 30000); // Every 30 seconds
+
+        // Send initial message to Android
+        setTimeout(() => {
+            if (typeof Android !== 'undefined') {
+                Android.onMessageReceived('WebView initialized and ready!');
+            }
+        }, 1000);
+    </script>
+</body>
+</html> 
